@@ -1,0 +1,31 @@
+# set configuration rule for git
+
+# custom os files
+.DS_Store
+*.pem
+
+# vs code editor steup
+.vscode
+.idea
+
+# notebook checkpoints
+*/.ipynb_checkpoints
+*.pyc
+*.pickle
+*.pkl
+*.txt
+*.csv
+*.h5
+*.json
+*.png
+*.jpg
+*.jpeg
+*.mp4
+
+
+# ignore data folder
+trash_code/**
+**/trash_code
+
+# python cache files
+__pycache__
