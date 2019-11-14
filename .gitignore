@@ -27,5 +27,7 @@
 trash_code/**
 **/trash_code
 
+**.ipynb_checkpoints/
+.ipynb_checkpoints/**
 # python cache files
 __pycache__

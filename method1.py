@@ -17,7 +17,7 @@ class model_architectures():
         # model training constants
         self.LSTM1_EMBEDDING_DIM = 128
         self.DROPOUT_FRACTION = 0.2
-        self.EPOCHS = 7
+        self.EPOCHS = 30
         self.BATCH_SIZE = 2048
 
         # data prep constants
@@ -48,74 +48,6 @@ class model_architectures():
 
         self.WORDS_IN_EMBEDDING = min(self.N_VOCAB, len(self.tokenizer.word_index))
 
-    def seq_model_small(self, nclass, max_question_length, dropout_fraction=0.2, embedding_weight = False):
-
-        if type(embedding_weight) is not bool:
-            embedding1_dim = embedding_weight.shape[1]
-        else:
-            embedding1_dim = 64
-
-        lstm1_output = 32
-        final_dense_outputs= 64
-        # Input Layers
-        question1 = layers.Input(shape=(max_question_length,), dtype='int32', name="question1")
-        question2 = layers.Input(shape=(max_question_length,), dtype="int32", name="question2")
-
-        # Hidden Layers
-        question1_embedding = layers.Embedding(input_dim=self.max_vocabulary+2,
-                                               output_dim=embedding1_dim,
-                                               name="words_embedding_que1")(question1)
-        question1_lstm1 = layers.LSTM(lstm1_output,
-                                                           dropout=dropout_fraction,
-                                                           recurrent_dropout=dropout_fraction,
-                                                           return_sequences=True,
-                                                           name="LSTM_que1")(question1_embedding)
-
-        question2_embedding = layers.Embedding(input_dim=self.max_vocabulary+2,
-                                               output_dim=embedding1_dim,
-                                               name="words_embedding_que2")(question2)
-        question2_lstm1 = layers.LSTM(lstm1_output,
-                                                           dropout=dropout_fraction,
-                                                           recurrent_dropout=dropout_fraction,
-                                                           return_sequences=True,
-                                                           name="LSTM_que2")(question2_embedding)
-
-        combined_embedding = layers.Concatenate(name="combined_embedding")([question1_lstm1, question2_lstm1])
-        combined_embedding = layers.Flatten()(combined_embedding)
-
-
-        # attention = layers.dot([question1_lstm1, question2_lstm1], [1, 1])
-        # attention = layers.Flatten()(attention)
-        # attention = layers.Dense((lstm1_output * max_question_length))(attention)
-        # attention = layers.Reshape((max_question_length, lstm1_output))(attention)
-        # merged = layers.add([question1_lstm1, attention])
-
-        merged = layers.Dense(final_dense_outputs, activation='relu')(combined_embedding)
-        merged = layers.Dropout(dropout_fraction)(merged)
-        merged = layers.BatchNormalization()(merged)
-        merged = layers.Dense(final_dense_outputs, activation='relu')(merged)
-        merged = layers.Dropout(dropout_fraction)(merged)
-        merged = layers.BatchNormalization()(merged)
-        merged = layers.Dense(final_dense_outputs, activation='relu')(merged)
-        merged = layers.Dropout(dropout_fraction)(merged)
-        merged = layers.BatchNormalization()(merged)
-        merged = layers.Dense(final_dense_outputs, activation='relu')(merged)
-        merged = layers.Dropout(dropout_fraction)(merged)
-        merged = layers.BatchNormalization()(merged)
-
-        # Output Layer
-        predict = layers.Dense(nclass, activation="softmax", name="final_layer")(merged)
-        model = Model(inputs=[question1, question2], outputs=predict)
-
-        if type(embedding_weight) is not bool:
-            model.get_layer('words_embedding_que1').set_weights([embedding_weight])
-            model.get_layer('words_embedding_que1').trainable = False
-
-            model.get_layer("words_embedding_que2").set_weights([embedding_weight])
-            model.get_layer('words_embedding_que2').trainable = False
-
-        model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
-        return model
 
     def seq_model(self, embedding_matrix):
 
@@ -127,21 +59,34 @@ class model_architectures():
         question1_embedding = layers.Embedding(input_dim=self.WORDS_IN_EMBEDDING + 1,
                                                output_dim=self.EMBEDDING_DIM,
                                                name="words_embedding_que1")(question1)
+
+        question1_lstm0 = layers.Bidirectional(layers.LSTM(self.LSTM1_EMBEDDING_DIM ,
+                                                           dropout=self.DROPOUT_FRACTION,
+                                                           recurrent_dropout=self.DROPOUT_FRACTION,
+                                                           return_sequences=True,
+                                                           name="LSTM0_que1"), merge_mode="sum")(question1_embedding)
+
         question1_lstm1 = layers.Bidirectional(layers.LSTM(self.LSTM1_EMBEDDING_DIM ,
                                                            dropout=self.DROPOUT_FRACTION,
                                                            recurrent_dropout=self.DROPOUT_FRACTION,
                                                            return_sequences=True,
-                                                           name="LSTM_que1"), merge_mode="sum")(question1_embedding)
+                                                           name="LSTM1_que1"), merge_mode="sum")(question1_lstm0)
 
         question2_embedding = layers.Embedding(input_dim=self.WORDS_IN_EMBEDDING + 1,
                                                output_dim=self.EMBEDDING_DIM,
                                                name="words_embedding_que2")(question2)
+
+        question2_lstm0 = layers.Bidirectional(layers.LSTM(self.LSTM1_EMBEDDING_DIM ,
+                                                           dropout=self.DROPOUT_FRACTION,
+                                                           recurrent_dropout=self.DROPOUT_FRACTION,
+                                                           return_sequences=True,
+                                                           name="LSTM0_que2"), merge_mode="sum")(question2_embedding)
+
         question2_lstm1 = layers.Bidirectional(layers.LSTM(self.LSTM1_EMBEDDING_DIM ,
                                                            dropout=self.DROPOUT_FRACTION,
                                                            recurrent_dropout=self.DROPOUT_FRACTION,
                                                            return_sequences=True,
-                                                           name="LSTM_que2"), merge_mode="sum")(question2_embedding)
-
+                                                           name="LSTM1_que2"), merge_mode="sum")(question2_lstm0)
         attention = layers.dot([question1_lstm1, question2_lstm1], [1, 1])
         attention = layers.Flatten()(attention)
         attention = layers.Dense((self.LSTM1_EMBEDDING_DIM * self.MAX_QUESTION_LENGTH))(attention)
@@ -149,30 +94,28 @@ class model_architectures():
 
         merged = layers.add([question1_lstm1, attention])
         merged = layers.Flatten()(merged)
-        merged = layers.Dense(256, activation='relu')(merged)
+        merged = layers.Dense(200, activation='relu')(merged)
         merged = layers.Dropout(self.DROPOUT_FRACTION)(merged)
         merged = layers.BatchNormalization()(merged)
-        merged = layers.Dense(256, activation='relu')(merged)
+        merged = layers.Dense(200, activation='relu')(merged)
         merged = layers.Dropout(self.DROPOUT_FRACTION)(merged)
         merged = layers.BatchNormalization()(merged)
-        merged = layers.Dense(256, activation='relu')(merged)
+        merged = layers.Dense(200, activation='relu')(merged)
         merged = layers.Dropout(self.DROPOUT_FRACTION)(merged)
         merged = layers.BatchNormalization()(merged)
-        merged = layers.Dense(256, activation='relu')(merged)
+        merged = layers.Dense(200, activation='relu')(merged)
         merged = layers.Dropout(self.DROPOUT_FRACTION)(merged)
         merged = layers.BatchNormalization()(merged)
 
         # Output Layer
         predict = layers.Dense(1, activation="sigmoid", name="final_layer")(merged)
-
         model = Model(inputs=[question1, question2], outputs=predict)
-
         for layer in model.layers:
             if layer.name in ["words_embedding_que1", "words_embedding_que2"]:
                 layer.set_weights([embedding_matrix])
                 layer.trainable = False
 
-        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['acc'])
+        model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
         return model
 
     # function to plot model training logs
@@ -215,7 +158,6 @@ class model_architectures():
             else:
                 axs[1].set_title('training accuracy')
             axs[1].legend()
-        plt.grid()
 
         if save_path:
             plt.savefig(save_path)
@@ -226,7 +168,7 @@ class model_architectures():
 
 if __name__ == "__main__":
 
-    model_trainig_iteration_name = "glove_seq"
+    model_trainig_iteration_name = "glove_2seq"
 
     model_creation_obj = model_architectures()
 
