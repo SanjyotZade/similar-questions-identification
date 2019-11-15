@@ -34,5 +34,5 @@ Training the model yields accuracy of ~82% on the test dataset.
 - model.py: A script with model architecture and training code.
 - inference.py: A script with two sentences as input and binary(yes/no) output indicating if sentences are duplicates
 
-
+Note: Trained model weights can be downloaded from [here](https://model-specific-public-storage.s3.amazonaws.com/que_similarity/quora_weights.h5)
 

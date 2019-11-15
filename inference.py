@@ -28,6 +28,6 @@ if __name__ == "__main__":
     que1 = "Why nobody answer my questions in Quora?"
     que2 = "Why is no one answering my questions in Quora?"
     label = 1
-    path_to_model = "./glove_2seq/weights-improvement-20-0.82.h5"
+    path_to_model = "./glove_2seq/quora_weights.h5"
     pred_obj = prediction(path_to_model)
     print (pred_obj.que_similarity(que1, que2))
