@@ -4,8 +4,8 @@
 import os
 import pickle
 import numpy as np
-from tensorflow.keras import layers
 import matplotlib.pyplot as plt
+from tensorflow.keras import layers
 from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import ModelCheckpoint
 os.environ["TF_CPP_MIN_LOG_LEVEL"]="3" # avoids tensorflow warning message
@@ -47,7 +47,6 @@ class model_architectures():
                 self.tokenizer = pickle.load(handle)
 
         self.WORDS_IN_EMBEDDING = min(self.N_VOCAB, len(self.tokenizer.word_index))
-
 
     def seq_model(self, embedding_matrix):
 
@@ -168,12 +167,11 @@ class model_architectures():
 
 if __name__ == "__main__":
 
-    model_trainig_iteration_name = "glove_2seq"
+    model_trainig_iteration_name = "glove_seq2"
 
     model_creation_obj = model_architectures()
 
-
-    # create model iteration folderQ
+    # create model iteration folder
     dir_path = os.path.dirname(os.path.realpath(__file__))
     model_dir_path = os.path.join(dir_path, model_trainig_iteration_name)
     if not os.path.exists(model_dir_path):
@@ -190,6 +188,7 @@ if __name__ == "__main__":
 
     embedding_weights_path = os.path.join(model_creation_obj.DIR_PATH, model_creation_obj.WORD_EMBEDDING_MATRIX_FILE)
     embedding_weights = np.load(open(embedding_weights_path, 'rb'))
+
     model = model_creation_obj.seq_model(embedding_weights)
 
     # This callback will save the current weights after every epoch
