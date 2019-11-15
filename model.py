@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from tensorflow.keras import layers
 from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import ModelCheckpoint
-os.environ["TF_CPP_MIN_LOG_LEVEL"]="3" # avoids tensorflow warning message
+os.environ["TF_CPP_MIN_LOG_LEVEL"]="3"
 
 
 class model_architectures():
