@@ -2,15 +2,15 @@
 
 # Problem statement
 Quora Question Pairs
-Can you identify question pairs that have the same intent?
+The task is to identify question pairs that have the same intent?
 
 # Description
 Many people on Quora ask questions with same intent in different wordings. 
-For better user experience on quora, these questions should be merged togather so that writers do not need to answer same question multiple times.
-Also it will make discovery of content easier on quora. Your task is to create a deep learning model to identify duplicate questions.
+For better user experience on quora, these questions should be merged together so that writers do not need to answer same question multiple times.
+Also it will make discovery of content easier on quora. The task is to create a deep learning model to identify duplicate questions.
 
 # Strategy
-Train a binary classifier with two seperate embedding layer each for question1 and question2. The embedding layers are innitialized with
+Train a binary classifier with two separate embedding layer each for question1 and question2. The embedding layers are initialized with
 glove 300d vectors. The model is trained with binary cross entropy, predicting if the questions are same or different.
 
 ## Data creation process
@@ -20,9 +20,9 @@ glove 300d vectors. The model is trained with binary cross entropy, predicting i
 
 ## training the model on the created dataset
 
- ![model arc](glove_2seq/training_stat.png)
+ ![model arc](./data/training_stat.png)
 
-Training the model yields accuracy og ~82% on the test dataset.
+Training the model yields accuracy of ~82% on the test dataset.
 
 ## Further improvements:
 - training a siamese network with triplet loss
@@ -32,7 +32,7 @@ Training the model yields accuracy og ~82% on the test dataset.
 
 - data_processing.py: A script with methods for text data creation for model training.
 - model.py: A script with model architecture and training code.
-- inference.py: c two sentences as input and binary(yes/no) output indicating if sentences are duplicates
+- inference.py: A script with two sentences as input and binary(yes/no) output indicating if sentences are duplicates
 
 
 

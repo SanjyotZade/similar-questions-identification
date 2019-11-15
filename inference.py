@@ -1,3 +1,5 @@
+# Copyright (C) 13/11/19 sanjyotzade
+
 from data_processing import data_preparation
 from tensorflow.keras.models import load_model
 
