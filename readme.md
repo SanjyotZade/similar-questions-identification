@@ -18,7 +18,7 @@ glove 300d vectors. The model is trained with binary cross entropy, predicting i
 - questions's data encoding, padding and trauncating
 - creating embedding weights
 
-## training the model on the created dataset
+## Training the model on the created dataset
 
  ![model arc](./data/training_stat.png)
 
@@ -28,7 +28,7 @@ Training the model yields accuracy of ~82% on the test dataset.
 - training a siamese network with triplet loss
 - using bert fine tuning for similarity prediction
 
-## code understanding
+## Code understanding
 
 - data_processing.py: A script with methods for text data creation for model training.
 - model.py: A script with model architecture and training code.
